@@ -108,15 +108,16 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       if (to) query.date.$lte = new Date(to);
     }
 
-    let exercises = Exercise.find(query).select('description duration date');
-    if (limit) exercises = exercises.limit(Number(limit));
+    let quer = Exercise.find(filter).select('description duration date');
+    if (limit) quer = quer.limit(parseInt(limit));
 
-    const log = (await exercises).map(e => ({
-      description: e.description,
-      duration: e.duration,
-      date: e.date.toDateString()
-    }));
-
+    const exercises = await query.exec();
+    const log = exercises.map(e => ({
+        description: e.description,
+        duration: e.duration,
+        date: e.date.toDateString()
+      }));
+  
     res.json({
       _id: user._id,
       username: user.username,
