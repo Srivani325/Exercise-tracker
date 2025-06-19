@@ -1,4 +1,3 @@
-
 // ✅ Exercise Tracker - Full Working Code (server.js)
 
 const express = require('express');
@@ -24,9 +23,14 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
+mongoose.connection.once('open', () => {
+    console.log('✅ Connected to MongoDB');
+  });
+  
+
 // ✅ Mongoose Schemas
-const userSchema = new mongoose.Schema({ username: String });
-const User = mongoose.model('User', userSchema);
+const userSchema = new mongoose.Schema({ username:{type: String,required:true} });
+const User = mongoose.model('ExerciseUser', userSchema);
 
 const exerciseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -39,11 +43,13 @@ const Exercise = mongoose.model('Exercise', exerciseSchema);
 // ✅ POST /api/users
 app.post('/api/users', async (req, res) => {
   const { username } = req.body;
+  console.log('👉 Received username:', username); // Debug log
   try {
     const user = new User({ username });
     const savedUser = await user.save();
     res.json({ username: savedUser.username, _id: savedUser._id });
   } catch (err) {
+    console.error('❌ Error while saving user:', err.message);
     res.status(500).json({ error: 'User creation failed' });
   }
 });
@@ -102,15 +108,16 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       if (to) query.date.$lte = new Date(to);
     }
 
-    let exercises = Exercise.find(query).select('description duration date');
-    if (limit) exercises = exercises.limit(Number(limit));
+    let quer = Exercise.find(filter).select('description duration date');
+    if (limit) quer = quer.limit(parseInt(limit));
 
-    const log = (await exercises).map(e => ({
-      description: e.description,
-      duration: e.duration,
-      date: e.date.toDateString()
-    }));
-
+    const exercises = await query.exec();
+    const log = exercises.map(e => ({
+        description: e.description,
+        duration: e.duration,
+        date: e.date.toDateString()
+      }));
+  
     res.json({
       _id: user._id,
       username: user.username,
@@ -125,3 +132,5 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 // ✅ Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
+module.exports=app;
