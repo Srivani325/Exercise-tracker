@@ -129,6 +129,45 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 //   }
 // });
 
+// app.get('/api/users/:_id/logs', async (req, res) => {
+//   const { from, to, limit } = req.query;
+//   const userId = req.params._id;
+
+//   try {
+//     const user = await User.findById(userId);
+//     if (!user) return res.status(404).json({ error: 'User not found' });
+
+//     let filter = { userId };
+
+//     if (from || to) {
+//       filter.date = {};
+//       if (from) filter.date.$gte = new Date(from);
+//       if (to) filter.date.$lte = new Date(to);
+//     }
+
+//     let query = Exercise.find(filter).select('description duration date');
+//     if (limit) query = query.limit(parseInt(limit));
+
+    // const exercises = await query.exec();
+
+    // const log = exercises.map(e => ({
+    //   description: e.description,
+    //   duration: e.duration,
+    //   date: e.date.toDateString()
+    // }));
+
+//     res.json({
+//       _id: user._id,
+//       username: user.username,
+//       count: log.length,
+//       log
+//     });
+//   } catch (err) {
+//     console.error('❌ Log retrieval failed:', err);
+//     res.status(500).json({ error: 'Failed to retrieve logs' });
+//   }
+// });
+
 app.get('/api/users/:_id/logs', async (req, res) => {
   const { from, to, limit } = req.query;
   const userId = req.params._id;
@@ -138,11 +177,10 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     let filter = { userId };
-
     if (from || to) {
       filter.date = {};
-      if (from) filter.date.$gte = new Date(from);
-      if (to) filter.date.$lte = new Date(to);
+      if (from && !isNaN(Date.parse(from))) filter.date.$gte = new Date(from);
+      if (to && !isNaN(Date.parse(to))) filter.date.$lte = new Date(to);
     }
 
     let query = Exercise.find(filter).select('description duration date');
@@ -167,6 +205,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve logs' });
   }
 });
+
 
 
 // ✅ Start the server
