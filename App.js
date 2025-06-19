@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({ username:{type: String,required:true} }
 const User = mongoose.model('ExerciseUser', userSchema);
 
 const exerciseSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'ExerciseUser' },
   description: String,
   duration: Number,
   date: Date
