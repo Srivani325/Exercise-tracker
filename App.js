@@ -29,11 +29,14 @@ mongoose.connection.once('open', () => {
   
 
 // ✅ Mongoose Schemas
-const userSchema = new mongoose.Schema({ username:{type: String,required:true} });
+// const userSchema = new mongoose.Schema({ username:{type: String,required:true} });
+ // const _id: mongoose.Schema.Types.ObjectId;
+
 const User = mongoose.model('ExerciseUser', userSchema);
 
 const exerciseSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'ExerciseUser' },
+  // userId: { type: mongoose.Schema.Types.ObjectId, ref: 'ExerciseUser' },
+  userId: String,
   description: String,
   duration: Number,
   date: Date
@@ -176,7 +179,10 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    let filter = { userId };
+    // let filter = { userId };
+
+    let filter = { userId: userId };
+
     if (from || to) {
       filter.date = {};
       if (from && !isNaN(Date.parse(from))) filter.date.$gte = new Date(from);
