@@ -79,7 +79,11 @@ app.post('/api/users', async (req, res) => {
 
 app.get('/api/users', async (req, res) => {
     try {
-      const users = await User.find({}, '_id username');
+      // const users = await User.find({}, '_id username');
+      const users = await User.find(
+      { username: { $exists: true, $ne: null } },  // 👍 only users with a username
+      'username _id'  // 👍 only return username and _id
+    );
       res.json(users);
     } catch (err) {
       res.status(500).json({ error: 'Server error' });
